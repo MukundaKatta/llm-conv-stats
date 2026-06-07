@@ -283,6 +283,27 @@ def test_aggregate_last_n_larger_than_turns():
     assert s.turns == 1
 
 
+def test_aggregate_last_n_zero():
+    # last_n=0 means "the last zero turns" -> empty aggregate, not all turns.
+    cs = ConvStats()
+    cs.record(input_tokens=100)
+    cs.record(input_tokens=200)
+    s = cs.aggregate(last_n=0)
+    assert s.turns == 0
+    assert s.total_input_tokens == 0
+    assert s.total_cost_usd is None
+    assert s.avg_latency_ms is None
+
+
+def test_aggregate_last_n_negative():
+    cs = ConvStats()
+    cs.record(input_tokens=100)
+    cs.record(input_tokens=200)
+    s = cs.aggregate(last_n=-1)
+    assert s.turns == 0
+    assert s.total_input_tokens == 0
+
+
 # ---------------------------------------------------------------------------
 # Serialisation
 # ---------------------------------------------------------------------------

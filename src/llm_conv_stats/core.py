@@ -207,12 +207,22 @@ class ConvStats:
         """Compute aggregate statistics.
 
         Args:
-            last_n: If given, aggregate only the most recent *n* turns.
+            last_n: If given, aggregate only the most recent *n* turns. A value
+                of ``0`` (or negative) aggregates no turns and returns an empty
+                :class:`Stats`.
 
         Returns:
             A :class:`Stats` instance.
         """
-        turns = self._turns[-last_n:] if last_n is not None else self._turns
+        if last_n is None:
+            turns = self._turns
+        elif last_n <= 0:
+            # ``self._turns[-0:]`` is ``self._turns[0:]`` which returns every
+            # turn, so the slice cannot express "the last 0 turns". Handle
+            # non-positive counts explicitly to keep the obvious meaning.
+            turns = []
+        else:
+            turns = self._turns[-last_n:]
         n = len(turns)
         if n == 0:
             return Stats()
